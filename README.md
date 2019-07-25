@@ -35,10 +35,15 @@ Get the latest rules
 wget "ftp://ftp.expasy.org/databases/hamap/hamap_sparql.tar.gz"
 tar -xzvf hamap_sparql.tar.gz
 ```
+Get the taxonomy data.
 
+```bash
+curl "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/rdf/taxonomy-hierarchy.rdf.xz" | unxz > taxonomy-hierarchy.rdf
+```
+Then run the rule against your data.
 ```
 while read -r rule in
 do
-  ./bin/sparql --data "$INPUT_FOR_HAMAP" --query $rule
+  ./bin/sparql --data <(cat taxonomy-hierarchy.rdf sparql/template_matches.ttl "$INPUT_FOR_HAMAP") --query $rule
 done < sparql/hamap.simple
 ```
