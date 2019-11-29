@@ -23,6 +23,9 @@ string is not available.
   <xsl:output method="text"/>
  
   <xsl:template match="/">
+   
+PREFIX ys:&lt;http://example.org/yoursequence/&gt;
+PREFIX yr:&lt;http://example.org/yourrecord/&gt;
 PREFIX up:&lt;http://purl.uniprot.org/core/&gt;
 PREFIX rdf:&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
 PREFIX rdfs:&lt;http://www.w3.org/2000/01/rdf-schema#&gt;
@@ -42,11 +45,11 @@ PREFIX edam: &lt;http://edamontology.org/&gt;
       <xsl:variable name="signatureid" select="in:signature/@ac"/>
       <xsl:variable name="start" select="in:locations/in:profilescan-location/@start"/>
       <xsl:variable name="end" select="in:locations/in:profilescan-location/@end"/>
-&lt;<xsl:value-of select="$sequenceid"/>&gt;
-  up:sequence &lt;<xsl:value-of select="$sequenceid"/>-sequence&gt; ;
+yr:<xsl:value-of select="$sequenceid"/>
+  up:sequence ys:<xsl:value-of select="$sequenceid"/> ;
   rdfs:seeAlso signature:<xsl:value-of select="$signatureid"/> .
   </xsl:for-each>
-&lt;<xsl:value-of select="$sequenceid"/>-sequence&gt;   
+ys:<xsl:value-of select="$sequenceid"/>  
   rdf:hasValue "<xsl:value-of select="in:sequence"/>" .
   
     <xsl:for-each select="in:matches/in:profilescan-match">
