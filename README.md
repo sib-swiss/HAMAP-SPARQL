@@ -16,6 +16,6 @@ Our goal was to develop a generic HAMAP rule format and annotation engine that i
 
 # How can I use it?
 
-Please try this [tutorial](Turtorial.md) to learn how to use a SPARQL engine to annotate protein sequences with HAMAP rules in SPARQL syntax.
+Please try this [tutorial](Tutorial.md) to learn how to use a SPARQL engine to annotate protein sequences with HAMAP rules in SPARQL syntax.
 
 
