@@ -1,49 +1,21 @@
-# hamapAsSparqlSupplements
+# What is HAMAP?
 
-These are the supllements for the Hamap as SPARQL preprint in code form.
+[HAMAP](https://hamap.expasy.org) is a system for the classification and annotation of protein sequences. 
+It consists of a collection of expert-curated protein family signatures and rules that specify annotations that apply to family members.
+It has originally been developed by the [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) to help curators annotate
+UniProtKB/Swiss-Prot records.
+Today it is part of the [UniProt automatic annotation pipeline](https://www.uniprot.org/help/automatic_annotation).
+To this end, the HAMAP signatures are integrated into [InterPro](http://www.ebi.ac.uk/interpro) and
+the HAMAP rules into [UniRule](https://www.uniprot.org/help/unirule).
 
-There is a function for use with Apache Jena that is more efficient 
-than using the REGEX approach.
+# Why SPARQL?
 
-There is also an XSLT used to convert the output from InterPro Scan
-to RDF so that it can be used on your own data with HAMAP as SPARQL.
+Our internal implementation of HAMAP uses a custom rule format and annotation engine that are not easy to integrate into other groups' pipelines. The [HAMAP-Scan web service](https://hamap.expasy.org/hamap_scan.html) is an option for small research projects, but not all projects can depend on external web services to process their data.
 
-## basic annotation system
+Our goal was to develop a generic HAMAP rule format and annotation engine that is easily portable, using standard technologies that developers of other genome annotation pipelines could also adopt. To achieve this we have developed a representation of HAMAP annotation rules using the World Wide Web Consortium (W3C) standard SPARQL 1.1 syntax. [SPARQL](https://en.wikipedia.org/wiki/SPARQL) is a query language for [RDF](https://en.wikipedia.org/wiki/Resource_Description_Framework), a core Semantic Web technology from the W3C. There are many freely available SPARQL engines available that can be used to annotate protein sequences expressed as RDF with HAMAP rules in SPARQL syntax.
 
+# How can I use it?
 
-Get a command line sparql engine using [Apache Jena](https://jena.apache.org) runing on java.
-
-
-```bash
-wget "http://www.pirbot.com/mirrors/apache/jena/binaries/apache-jena-3.12.0.tar.gz"
-tar xzvf apache-jena-3.12.0.tar.gz
-export JENA_HOME=$(pwd)/apache-jena-3.12.0
-export PATH=$JENA_HOME/bin/:$PATH
-```
-
-Make sure to turn the interpro results into RDF
-
-```bash
-./interproscan.sh -dp -appl hamap "$YOUR_SEQ"
-xsltproc to_rdf.xslt “$IP_OUT” > "$INPUT_FOR_HAMAP"
-```
+Please try this [tutorial](Turtorial.md) to learn how to use a SPARQL engine to annotate protein sequences with HAMAP rules in SPARQL syntax.
 
 
-Get the latest rules
-
-```bash
-wget "ftp://ftp.expasy.org/databases/hamap/hamap_sparql.tar.gz"
-tar -xzvf hamap_sparql.tar.gz
-```
-Get the taxonomy data.
-
-```bash
-curl "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/rdf/taxonomy-hierarchy.rdf.xz" | unxz > taxonomy-hierarchy.rdf
-```
-Then run the rule against your data.
-```
-while read -r rule in
-do
-  ./bin/sparql --data <(cat taxonomy-hierarchy.rdf sparql/template_matches.ttl "$INPUT_FOR_HAMAP") --query $rule
-done < sparql/hamap.simple
-```
