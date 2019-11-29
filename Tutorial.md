@@ -96,7 +96,7 @@ cat TEST_SEQUENCES.fasta \
 
 The result file `TEST_SEQUENCES.ttl` should now look similar to this:
 
-```
+```turtle
 PREFIX ys:<http://example.org/yoursequence/>
 PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 ys:UPI0000000053 rdf:value "MTNLKAVIPV...KGIEKLLSE" . 
@@ -306,3 +306,25 @@ Here is an example that uses the `xargs` command to run four parallel processes:
 time xargs -a sparql/hamap.simple -P 4 -d '\n' -I % \
   -exec sh -c "curl \"http://localhost:3030/sparql\" --data-urlencode \"query=%\" > \$(echo \"%\" | grep -oP \"MF_\d{5}\" | head -n1).ttl"
 ```
+
+
+## Speading up rule execution
+
+For many of the rules the rebuilding of the taxonomic tree with `rdfs:subClassOf+` in the SPARQL queries can be the dominating runtime factor. 
+If you materialize the taxonomy tree into the triple store one can use `rdfs:subClassOf` intead which may be much faster.
+
+```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+INSERT {?taxon rdfs:subClassOf ?super} WHERE { ?taxon rdfs:subClassOf+ ?super }
+```
+
+```bash
+curl http://localhost:3030/sparql/update -X POST --data 'update=PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0A%0AINSERT+%7B%3Ftaxon+rdfs%3AsubClassOf+%3Fsuper%7D+WHERE+%7B+%3Ftaxon+rdfs%3AsubClassOf%2B+%3Fsuper+%7D+' -H 'Accept: text/plain,*/*;q=0.9'
+```
+
+Then in the queries find and replace `rdfs:subClassOf+` with `rfds:subClassOf`.
+The taxonomic data is in the form _E. coli_ -> _Escherichia_ -> _Enterobacteriaceae_ -> .. -> _Bacteria_ . And the plus symbol in the query means follow 1 or more of the steps in this tree.
+By materializing we introduce shortcuts,  _E. coli_ -> _Bacteria_ .
+This makes the query easier to answer for most triple stores including TDB2.
+ 
