@@ -45,7 +45,7 @@ PREFIX edam: &lt;http://edamontology.org/&gt;
       <xsl:variable name="signatureid" select="in:signature/@ac"/>
       <xsl:variable name="start" select="in:locations/in:profilescan-location/@start"/>
       <xsl:variable name="end" select="in:locations/in:profilescan-location/@end"/>
-yr:<xsl:value-of select="$sequenceid"/>;
+yr:<xsl:value-of select="$sequenceid"/>
   up:sequence ys:<xsl:value-of select="$sequenceid"/> ;
   rdfs:seeAlso signature:<xsl:value-of select="$signatureid"/> .
   </xsl:for-each>
