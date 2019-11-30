@@ -2,11 +2,7 @@
 
 [HAMAP](https://hamap.expasy.org) is a system for the classification and annotation of protein sequences. 
 It consists of a collection of expert-curated protein family signatures and rules that specify annotations that apply to family members.
-It has originally been developed by the [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) to help curators annotate
-UniProtKB/Swiss-Prot records.
-Today it is part of the [UniProt automatic annotation pipeline](https://www.uniprot.org/help/automatic_annotation).
-To this end, the HAMAP signatures are integrated into [InterPro](http://www.ebi.ac.uk/interpro) and
-the HAMAP rules into [UniRule](https://www.uniprot.org/help/unirule).
+HAMAP was originally developed by the [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) group to help curators annotate UniProtKB/Swiss-Prot records and was subsequently made available to external users. HAMAP signatures are also integrated into [InterPro](http://www.ebi.ac.uk/interpro) and the HAMAP rules into [UniRule: UniProt automatic annotation pipeline](https://www.uniprot.org/help/automatic_annotation).
 
 # Why SPARQL?
 
