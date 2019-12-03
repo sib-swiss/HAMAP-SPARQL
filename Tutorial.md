@@ -9,14 +9,14 @@ The [HAMAP](https://hamap.expasy.org) system classifies and annotates protein se
 
 For this tutorial we will use the sequences of the _E. coli_ proteome [UP000069664](https://www.uniprot.org/proteomes/UP000069664) that you can download in FASTA format from [UniParc](https://www.uniprot.org/uniparc/):
 
-```
+```bash
 wget "https://www.uniprot.org/uniparc/?query=proteome:UP000069664&format=fasta" \
   -O TEST_SEQUENCES.fasta
 ```
 
 Now download the HAMAP signatures:
 
-```
+```bash
 wget "https://ftp.expasy.org/databases/hamap/hamap.prf.gz"
 gunzip hamap.prf.gz
 ```
@@ -28,7 +28,7 @@ The [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) uses the program
 ### Method 1: PfTools v3.2
 
 * Download the [PfTools v3.2](https://github.com/sib-swiss/pftools3/blob/master/README.md) code from GitHub and follow the instructions in the [INSTALL](https://github.com/sib-swiss/pftools3/blob/master/INSTALL) file to compile the code, e.g.:
-  ```
+  ```bash
   git clone https://github.com/sib-swiss/pftools3.git
   cd pftools3
   mkdir build
@@ -46,7 +46,7 @@ The [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) uses the program
   ```
 
 * Scan the FASTA file with the HAMAP signatures, using the -o10 option for the Turtle output format:
-  ```
+  ```bash
   pftools3/build/src/C/pfscanV3 hamap.prf -f TEST_SEQUENCES.fasta -o10 > TEST_SCAN.ttl
   ```
 
@@ -54,19 +54,19 @@ The [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) uses the program
 
 * Download the [InterProScan](https://github.com/ebi-pf-team/interproscan/wiki) package.
   This will take a while because the package is very big!
-  ```
+  ```bash
   wget "ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.39-77.0/interproscan-5.39-77.0-64-bit.tar.gz"
   tar -xvzf interproscan-5.39-77.0-64-bit.tar.gz
   ```
 
 * Scan the FASTA file with the HAMAP signatures:
-  ```
+  ```bash
   interproscan-5.39-77.0/interproscan.sh --disable-precalc --applications hamap \
-  --formats XML --input TEST_SEQUENCES.fasta --outfile TEST_SCAN.xml
+    --formats XML --input TEST_SEQUENCES.fasta --outfile TEST_SCAN.xml
   ```
 
 * Download the XSLT stylesheet [`interproToRdf.xslt`](src/main/xlst/interproToRdf.xslt) and use it to convert the InterPro XML result file to Turtle format:
-  ```
+  ```bash
   xsltproc interproToRdf.xslt TEST_SCAN.xml > TEST_SCAN.ttl
   ```
 
@@ -74,20 +74,20 @@ The [Swiss-Prot group](https://www.sib.swiss/alan-bridge-group) uses the program
 
 You need to convert each FASTA record to one RDF statement of the following format:
 
-```
+```turtle
 ys:IDENTIFIER rdf:value "SEQUENCE" .
 ```
 
 First define the namespaces that we will use in the RDF statements:
 
-```
+```bash
 printf "PREFIX ys:<http://example.org/yoursequence/>
 PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" \
-> TEST_SEQUENCES.ttl
+  > TEST_SEQUENCES.ttl
 ```
 
 Now execute the following command to convert the FASTA file to RDF turtle format:
-```
+```bash
 cat TEST_SEQUENCES.fasta \
   | awk '/^>/ {printf("\" . \nys:%s rdf:value \"", substr($1,2)); next; } \
               {printf("%s", $0)} END {printf("\" .\n")}' \
@@ -124,32 +124,33 @@ If you try this tutorial with sequences from a different organism, please [looku
 If you cannot find an identifier for your species, use instead the identfier of its genus or a closely related species. Then replace the number '511145' in the code examples below with the NCBI taxonomy identifier you found.
 
 * First define the namespaces that we will use in the RDF statements:
-  ```
+  ```bash
   printf "PREFIX up:<http://purl.uniprot.org/core/>
   PREFIX taxon:<http://purl.uniprot.org/taxonomy/>
   PREFIX yr:<http://example.org/yourrecord/>\n" \
-  > TEST_ORGANISM.ttl
+    > TEST_ORGANISM.ttl
   ```
 
 * Then append the full taxonomic lineage for the organism in RDF.
   You can retrieve this data from the [UniProt](https://www.uniprot.org/taxonomy/) website:
-  ```
-  wget "http://www.uniprot.org/taxonomy/?query=id:511145&include=yes&format=ttl" -O - >> TEST_ORGANISM.ttl
+  ```bash
+  wget "http://www.uniprot.org/taxonomy/?query=id:511145&include=yes&format=ttl" \
+    -O - >> TEST_ORGANISM.ttl
   ```
 
 * Now you must add one RDF statement of the following format for each of the sequence records:
-  ```
+  ```turtle
   yr:IDENTIFIER up:organism taxon:511145 .
   ```
   You can use the previously generate `TEST_SEQUENCES.ttl` file to do this:
-  ```
+  ```bash
   grep -oP "^ys:\w+" TEST_SEQUENCES.ttl | cut -c 4- \
     | awk '{print "yr:"$1" up:organism taxon:511145 ."}' >> TEST_ORGANISM.ttl
   ```
 
 The result file `TEST_ORGANISM.ttl` should now look similar to this:
 
-```
+```turtle
 PREFIX up:<http://purl.uniprot.org/core/>
 PREFIX taxon:<http://purl.uniprot.org/taxonomy/>
 PREFIX yr:<http://example.org/yourrecord/>
@@ -165,7 +166,7 @@ The HAMAP FTP site distributes several representations of the rules for use with
 
 For this tutorial you need to download the following files:
 
-```
+```bash
 wget "https://ftp.expasy.org/databases/hamap/sparql/hamap.sparql"
 wget "https://ftp.expasy.org/databases/hamap/sparql/hamap.simple"
 wget "https://ftp.expasy.org/databases/hamap/sparql/template_matches.ttl"
@@ -193,11 +194,11 @@ Now you have all the data that you need in RDF Turtle format.
 
 Concatenate the results of the scan, the sequences and the organism information, as well as the HAMAP template matches.
 
-```
+```bash
 cat TEST_SCAN.ttl \
     TEST_SEQUENCES.ttl  \
     TEST_ORGANISM.ttl \
-    sparql/template_matches.ttl > TEST_DATA.ttl
+    template_matches.ttl > TEST_DATA.ttl
 ```
 
 ## Use a SPARQL engine to apply the rules
@@ -212,7 +213,7 @@ We use here the in-memory store of the [Apache Jena](https://jena.apache.org/abo
 project to illustrate how you can annotate sequences with SPARQL rules.
 
 * Download Apache Jena:
-  ```
+  ```bash
   wget "http://mirror.easyname.ch/apache/jena/binaries/apache-jena-3.13.1.tar.gz"
   tar -xzvf apache-jena-3.13.1.tar.gz
   export JENA_HOME="$(pwd)/apache-jena-3.13.1"
@@ -220,18 +221,18 @@ project to illustrate how you can annotate sequences with SPARQL rules.
   ```
 
 * Test that it works with the first rule in the 'simple' format:
-  ```
+  ```bash
   sparql --data TEST_DATA.ttl --results=TSV --query \
-    <(head -n1 sparql/hamap.simple) | tail -n +2
+    <(head -n1 hamap.simple) | tail -n +2
   ```
 
 * Now loop over all rules:
-  ```
+  ```bash
   while read rule
   do
       sparql --data TEST_DATA.ttl --results=TSV "$rule" \
         | tail -n +2 > $(echo "$rule" | grep -oP "MF_\d{5}" | head -n1).tsv
-  done < sparql/hamap.simple
+  done < hamap.simple
   ```
 
 Note: This simple approach of looping over all rules is not very efficient.
@@ -248,18 +249,18 @@ It is tightly integrated with [TDB2](https://jena.apache.org/documentation/tdb2/
 Fuseki can run as a webserver, which allows to send queries over HTTP to the database engine.
 
 * Download Apache Jena Fuseki:
-  ```
+  ```bash
   wget "http://mirror.easyname.ch/apache/jena/binaries/apache-jena-fuseki-3.13.1.tar.gz"
   tar xzvf apache-jena-fuseki-3.13.1.tar.gz
   ```
 
 * Load the data into the TDB2 database (the command `tdb2.tdbloader` is in the Apache Jena package):
-  ```
+  ```bash
   tdb2.tdbloader --loc ./TEST_TDB2 TEST_DATA.ttl
   ```
 
 * Start the Fuseki webserver:
-  ```
+  ```bash
   apache-jena-fuseki-3.13.1/fuseki-server --tdb2 --loc ./TEST_TDB2/ /sparql
   ```
   Fuseki normally runs on port 3030.
@@ -267,53 +268,67 @@ Fuseki can run as a webserver, which allows to send queries over HTTP to the dat
 
 * Run all queries using the `rsparql` command or an HTTP client like `curl`, `wget`, etc.
 
-  * Example 1: Run the 'simple' rules with the `rsparql` command:
-    ```
+  * Example 1: Run the 'simple' rules with an `rsparql` command:
+    ```bash
     while read rule
     do 
-        rsparql --service "http://localhost:3030/sparql" --results=TSV "$rule" \
-          | tail -n +2 > $(echo "$rule" | grep -oP "MF_\d{5}" | head -n1).tsv
-    done < sparql/hamap.simple
+        rsparql --service "http://localhost:3030/sparql" --results=TSV "$rule" | \
+          tail -n +2 > $(echo "$rule" | grep -oP "MF_\d{5}" | head -n1).tsv
+    done < hamap.simple
     ```
 
-  * Example 2: Run the 'complete' rules with the `curl` command:
-    ```
+  * <a name="option-2-persistent-rdf-store-example-2"></a>
+    Example 2: Run the 'complete' rules with a `curl` command:
+    ```bash
     while read rule
     do 
-        curl "http://localhost:3030/sparql" --data-urlencode "query=$rule" \ 
-          > $(echo "$rule" | grep -oP "MF_\d{5}" | head -n1).ttl
-    done < sparql/hamap.sparql
+        curl "http://localhost:3030/sparql" --data-urlencode "query=$rule" > \
+          $(echo "$rule" | grep -oP "MF_\d{5}" | head -n1).ttl 2> /dev/null  
+    done < hamap.sparql
     ```
+
+## Optimizations
+
+### Parallel rule execution
 
 In our tests of annotating all Swiss-Prot sequences with HAMAP rules,
 the execution of the queries via a `curl` command on a Fuseki server
 was faster than the scanning of the sequences with the signatures.
-The throughput can easily be increased by running queries in parallel.
-Here is an example that uses the `xargs` command to run four parallel processes:
 
+Both steps can be easily parallelized to reduce the execution time when processing large amounts of data.
+
+Here is an example that uses the `xargs` command to run four parallel processes of the command that was shown in [Example 2](#option-2-persistent-rdf-store-example-2) to execute the 'complete' rules with a `curl` command on a Fuseki webserver:
+
+```bash
+xargs -a hamap.sparql -P 4 -d '\n' -I % -exec sh -c \
+  "curl \"http://localhost:3030/sparql\" --data-urlencode \"query=%\" > "`
+ `"\$(echo \"%\" | grep -oP \"MF_\d{5}\" | head -n1).ttl" 2> /dev/null
 ```
-time xargs -a sparql/hamap.simple -P 4 -d '\n' -I % \
-  -exec sh -c "curl \"http://localhost:3030/sparql\" --data-urlencode \"query=%\" > \$(echo \"%\" | grep -oP \"MF_\d{5}\" | head -n1).ttl"
-```
 
+### Materializing taxonomy data
 
-## Speading up rule execution
+The rules that you downloaded from the HAMAP FTP site use `rdfs:subClassOf+` statements to determine whether the organism of your sequences is within the taxonomic scope of a rule. This has the advantage that you have to load less taxonomy data into your RDF store, but means that the SPARQL query engine has to re-build the taxonomy hierarchy for each query, and this can be the rate-limiting step for many of the rules.
 
-For many of the rules the rebuilding of the taxonomic tree with `rdfs:subClassOf+` in the SPARQL queries can be the dominating runtime factor. 
-If you materialize the taxonomy tree into the triple store one can use `rdfs:subClassOf` intead which may be much faster.
+To optimize for speed, you can materialize the taxonomy hierarchy in your RDF store with this statement:
 
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
 INSERT {?taxon rdfs:subClassOf ?super} WHERE { ?taxon rdfs:subClassOf+ ?super }
 ```
 
+On a Fuseki server, you can execute this statement via a `curl` command:
+
 ```bash
-curl http://localhost:3030/sparql/update -X POST --data 'update=PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0A%0AINSERT+%7B%3Ftaxon+rdfs%3AsubClassOf+%3Fsuper%7D+WHERE+%7B+%3Ftaxon+rdfs%3AsubClassOf%2B+%3Fsuper+%7D+' -H 'Accept: text/plain,*/*;q=0.9'
+curl http://localhost:3030/sparql/update -X POST \
+--data 'update=PREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0A%0AINSERT+%7B%3Ftaxon+rdfs%3AsubClassOf+%3Fsuper%7D+WHERE+%7B+%3Ftaxon+rdfs%3AsubClassOf%2B+%3Fsuper+%7D+' \
+-H 'Accept: text/plain,*/*;q=0.9'
 ```
 
-Then in the queries find and replace `rdfs:subClassOf+` with `rfds:subClassOf`.
-The taxonomic data is in the form _E. coli_ -> _Escherichia_ -> _Enterobacteriaceae_ -> .. -> _Bacteria_ . And the plus symbol in the query means follow 1 or more of the steps in this tree.
-By materializing we introduce shortcuts,  _E. coli_ -> _Bacteria_ .
-This makes the query easier to answer for most triple stores including TDB2.
- 
+Then you can replace `rdfs:subClassOf+` with `rfds:subClassOf` in the rules:
+
+```bash
+sed -r -i 's/rdfs:subClassOf\+/rdfs:subClassOf/g' hamap.sparql
+sed -r -i 's/rdfs:subClassOf\+/rdfs:subClassOf/g' hamap.simple
+```
+
+This will reduce the query execution time in most RDF stores, including TDB2.
