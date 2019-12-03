@@ -161,36 +161,25 @@ yr:UPI0000000054 up:organism taxon:511145 .
 
 ## Get the SPARQL representation of the HAMAP rules
 
+The HAMAP FTP site distributes several representations of the rules for use with Semantic Web technologies that are described in the [README](https://ftp.expasy.org/databases/hamap/sparql/README) file.
+
+For this tutorial you need to download the following files:
+
 ```
-wget "https://ftp.expasy.org/databases/hamap/hamap_sparql.tar.gz"
-tar -xzvf hamap_sparql.tar.gz
+wget "https://ftp.expasy.org/databases/hamap/sparql/hamap.sparql"
+wget "https://ftp.expasy.org/databases/hamap/sparql/hamap.simple"
+wget "https://ftp.expasy.org/databases/hamap/sparql/template_matches.ttl"
 ```
 
-This distribution contains several types of SPARQL rules:
+* The `hamap.sparql` file contains the rules in SPARQL syntax with a CONSTRUCT clause to generate RDF statements for all annotation types in [UniProt RDF format](https://sparql.uniprot.org/uniprot).
 
-* Rules that generate all annotation types in [UniProt RDF format](https://sparql.uniprot.org/uniprot):
+* The `hamap.simple` file contains the rules in SPARQL syntax with a SELECT clause to generate only a limited set of key annotation types
+([GO terms](http://geneontology.org/),
+[EC numbers](https://en.wikipedia.org/wiki/Enzyme_Commission_number),
+[UniProt keywords](https://www.uniprot.org/keywords/))
+in tabular format.
 
-  * hamap.sparql  
-    SPARQL syntax with CONSTRUCT clause to generate RDF statements.
-  * hamap.sparul  
-    SPARQL syntax with INSERT clause for writing results to a triplestore.
-  * hamap.visql  
-    SPARQL syntax with INSERT clause tuned for writing results to [Virtuoso](http://vos.openlinksw.com/owiki/wiki/VOS) v7.2.
-  * hamap.ttl  
-    [SPIN](https://spinrdf.org/) syntax.
-
-* Rules that generate only a limited set of key annotation types
-  ([GO terms](http://geneontology.org/),
-  [EC numbers](https://en.wikipedia.org/wiki/Enzyme_Commission_number),
-  [UniProt keywords](https://www.uniprot.org/keywords/))
-  in tabular format:
-
-  * hamap.simple  
-    SPARQL syntax with SELECT clause.
-  * hamap.orsql  
-    For use with [Oracle Spatial and Graph](https://www.oracle.com/database/technologies/spatialandgraph.html).
-
-It also includes the file `template_matches.ttl` that stores the result of a scan of 
+* The file `template_matches.ttl` stores the result of a scan of 
 the Swiss-Prot entries that are used to curate the HAMAP rules (so called 'template entries')
 with the HAMAP signatures.
 The alignment of these Swiss-Prot sequences to HAMAP signatures is required
