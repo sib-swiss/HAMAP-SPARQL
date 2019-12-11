@@ -2,6 +2,22 @@
 
 This tutorial was tested on CentOS 7 and should also work on recent Fedora.
 
+*Table of contents*
+
+* [Get the protein sequences and HAMAP signatures](#get-the-protein-sequences-and-hamap-signatures)
+* [Scan the protein sequences with the HAMAP signatures](#scan-the-protein-sequences-with-the-hamap-signatures)
+  * [Method 1: PfTools v3.2](#method-1-pftools-v32)
+  * [Method 2: InterProScan](#method-2-interproscan)
+* [Generate organism information](#generate-organism-information)
+* [Get the SPARQL representation of the HAMAP rules](#get-the-sparql-representation-of-the-hamap-rules)
+* [Combine all data into one file](#combine-all-data-into-one-file)
+* [Use a SPARQL engine to apply the rules](#use-a-sparql-engine-to-apply-the-rules)
+  * [Option 1: In-memory RDF store](#option-1-in-memory-rdf-store)
+  * [Option 2: Persistent RDF store](#option-2-persistent-rdf-store)
+* [Optimizations](#optimizations)
+  * [Parallel rule execution](#parallel-rule-execution)
+  * [Materializing taxonomy data](#materializing-taxonomy-data)
+
 ## Get the protein sequences and HAMAP signatures
 
 The [HAMAP](https://hamap.expasy.org) system classifies and annotates protein sequences using a collection of expert-curated protein family signatures and annotation rules. We describe here two methods to scan protein sequences with the HAMAP signatures and both require the sequences in [FASTA format](https://en.wikipedia.org/wiki/FASTA_format). 
